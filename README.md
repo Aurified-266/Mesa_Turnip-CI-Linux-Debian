@@ -1,7 +1,4 @@
-This is a bash script to build freedreno/turnip for android as a magisk module and an Adreno Tools driver package.
-
-### Scheduled Releases
-- Automated releases at 06:00 UTC on the 1st and 15th of each month.
+This is a bash script to build freedreno/turnip for android as a magisk module. Made specifically for compatibilty with linux.
 
 ### Notes;
 
