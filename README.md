@@ -54,7 +54,8 @@ The final meson setup command that made it all work:
 -Dc_link_args="-L$workdir/stub_libs -lz_stub -ldl"
 
 🚀 Conclusion
-Went from a script that failed at the first line in linux-deb due to path spaces to a robust, automated pipeline that:
+
+pivoted from an original script that failed at the first line in linux-deb due to path spaces, to a robust; automated pipeline that:
 
 Downloads the NDK and Mesa source.
 Patches the source code to remove incompatible features.
