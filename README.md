@@ -74,6 +74,10 @@ This is a significant engineering achievement in the realm of open-source Androi
 
 ### References
 
+- https://gitlab.freedesktop.org/mesa/mesa/
+
+- https://mesa3d.org/
+
 - https://forum.xda-developers.com/t/getting-freedreno-turnip-mesa-vulkan-driver-on-a-poco-f3.4323871/
 
 - https://gitlab.freedesktop.org/mesa/mesa/-/issues/6802
