@@ -1,4 +1,4 @@
-This is a bash script to build freedreno/turnip for android as a magisk module. Made specifically for compatibilty with linux.
+This is a bash script to build freedreno/turnip for android as a magisk module. Made specifically for compatibilty with linux-deb. Linux-deb users may encounter a host of problems when attemptiong to compile the bash script origionally given by k11mch1, this new bash script bypasses issues surrounding header problems, linker issues, and lack of identifying deb /usr prereq install locations.
 
 ### Notes;
 
