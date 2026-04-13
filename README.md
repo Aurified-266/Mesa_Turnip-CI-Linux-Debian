@@ -7,7 +7,7 @@ This is a bash script to build freedreno/turnip for android as a magisk module. 
 - Tested with these apps/games listed [here](list.md).
 
 ### To Build Locally
-- Obtain the script [turnip_builder.sh](https://raw.githubusercontent.com/ilhan-athn7/freedreno_turnip-CI/main/turnip_builder.sh) on your linux environment. (visit the link and use ```CTRL + S``` keys)
+- Obtain the script [turnip_builder.sh]
 - Execute script on linux terminal ```bash ./turnip_builder.sh```
 
 ### References
