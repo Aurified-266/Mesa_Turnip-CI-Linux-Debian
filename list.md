@@ -22,4 +22,4 @@
 | Kenji-NX Emulator         | ✅     | Tested by [@Aurified.Dev](//github.com/Aurified-266)<br>
 |
 | Vita3K         | ✅     | Tested by [@Aurified.Dev](//github.com/Aurified-266)<br>                                        |
-| AM2R (Another Metroid 2 Remake)         | ✅     | Tested by [@Aurified.Dev](//github.com/Aurified-266)<br>                                        |
+| AM2R (Another Metroid 2 Remake)         | ✅     | Tested by [@Aurified.Dev](//github.com/Aurified-266)<br>Working, 30 fps Retroid Pocket 5 device capped - Ultra Settings.                                       |
