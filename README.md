@@ -7,7 +7,9 @@ This is a bash script to build Turnip for android as a magisk module and adpkg. 
 The script now successfully builds vulkan.turnip.so (Mesa 26.0.5) for Android aarch64 on Linux Debian and packages it into a Magisk module and adpkg, ready for installation on Adreno GPU devices.
 
 🔍 Summary of Changes & Fixes
+
 1. Variable Scope: Fixed a bug where $MESASRC_DIR was used as an absolute path after cding into it, causing double-path errors. Switched to relative paths (src/...) inside the build function.
+
 2. Dependency Management (The "Host Library" Nightmare)
 Host vs. Target Mismatch: The linker kept trying to link against x86_64 host libraries (/usr/lib/x86_64-linux-gnu/libz.so, libelf.so) instead of the aarch64 NDK libraries.
 Fix: Added sed commands to strip these explicit host paths from the generated build.ninja file.
@@ -15,6 +17,7 @@ Missing libz (Zlib): Disabling zlib caused "undefined symbol" errors (gzopen, de
 Fix: Created custom C stubs (zlib_stubs.c) that provide empty implementations of all gz* functions. Compiled these into a static library (libz_stub.a) and injected it into the link command right before --end-group to satisfy the linker without needing the real library.
 Missing libdl: Meson couldn't find libdl in the cross-compile environment.
 Fix: Added -ldl explicitly to the linker arguments, relying on the NDK's libc which provides these symbols on Android.
+
 3. Feature Disabling for Stability
 To bypass complex dependencies that were impossible to resolve cleanly in a cross-compile environment, deliberately disabled non-essential features:
 
@@ -68,6 +71,9 @@ Packages it into a flashable Magisk module.
 ### To Build Locally
 - Obtain the script [turnip_builder.sh]
 - Execute script on linux deb terminal ```bash ./turnip_builder.sh```
+
+### ToDo: 
+- Resolve complex dependency issues to enable shader cache and shader cache compression
 
 ### References
 
