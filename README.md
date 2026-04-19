@@ -66,9 +66,10 @@ Auto populates correct meta and other config info based on version.
 Packages it into a flashable Magisk module following consistent naming convention.
 Packages an ADPKG file ready for emulators, or for other Adreno GPU's by other root method access; following consistent naming convention.
 
+#### Tested with these apps/games listed [here](list.md). 
+
 #### Magisk Build:
 - Root must be visible to target app/game.
-- Tested with these apps/games listed [here](list.md).
 
 #### Emulation/Root adpkg
 - For emulators, or other root level adpkg installs - software or firmware
