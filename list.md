@@ -6,6 +6,8 @@
 | Kenji-NX Emulator                               | ✅     | Tested by [@Aurified.Dev](//github.com/Aurified-266)<br>                                                                    |
 | Vita3K Emulator                                 | ✅     | Tested by [@Aurified.Dev](//github.com/Aurified-266)<br>                                                                    |
 | Azahar Emulator                                 | ✅     | Tested by [@Aurified.Dev](//github.com/Aurified-266)<br>                                                                    |
+| Dolphin Emulator                                | ✅     | Tested by [@Aurified.Dev](//github.com/Aurified-266)<br>                                                                    |
+| PPSSPP                                          | ✅     | Tested by [@Aurified.Dev](//github.com/Aurified-266)<br>requires root - app uses installed firmware driver - requires system level implementation|
 | AM2R (Another Metroid 2 Remake)                 | ✅     | Tested by [@Aurified.Dev](//github.com/Aurified-266)<br>                                                                    |
 | Firmware/System level driver - Qualcomm Adreno 650 | ✅     | Tested by [@Aurified.Dev](//github.com/Aurified-266)<br>Tested on Magisk rooted Retroid Pocket 5 - confirmed with DevCheck|
 | Genshin Impact                                  | ✅     | Edit `hardware_model_config.json` for vulkan.<br>May crash or display glitches on certain version.<br>Poor performance.   |
@@ -14,8 +16,6 @@
 | GRID™ Autosport                                 | ✅     | Tested by [V3KT0R-87](//github.com/V3KT0R-87)                                                                             |
 | SpongeBob SquarePants Battle For Bikini Bottom  | ✅     | Tested by [V3KT0R-87](//github.com/V3KT0R-87)<br>Poor performance.                                                        |
 | Carx Street                                     | ✅     | Tested by [V3KT0R-87](//github.com/V3KT0R-87)                                                                             |
-| Dolphin Emulator                                | ✅     | Tested by [V3KT0R-87](//github.com/V3KT0R-87)<br>                                                                         |
-| PPSSPP                                          | ✅     | Tested by [V3KT0R-87](//github.com/V3KT0R-87)                                                                             |
 | EggNS                                           | ✅     | Tested by [V3KT0R-87](//github.com/V3KT0R-87)<br>Poor performance.                                                        |
 | ANGLE (com.android.angle)                       | ✅     |                                                                                                                           |
 | ARK: Survival Evolved                           | ✅     |                                                                                                                           |
