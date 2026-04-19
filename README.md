@@ -4,7 +4,7 @@ This is a bash script to build Turnip for android as a magisk module and adpkg. 
 
 ### Notes;
 
-The script now successfully builds vulkan.turnip.so (Mesa 26.0.5) for Android aarch64 on Linux Debian and packages it into a Magisk module and adpkg, ready for installation on Adreno GPU devices.
+The script now successfully builds vulkan.turnip.so (Mesa 26.0.X) for Android aarch64 on Linux Debian and packages it into a Magisk module and adpkg, ready for installation on Adreno GPU devices.
 
 🔍 Summary of Changes & Fixes
 
@@ -36,6 +36,9 @@ Fix: Created dummy empty files for these targets in the build directory so Ninja
 Dynamic NDK Handling: Replaced hardcoded NDK paths with variables ($ndkver, $NDK_TOOLCHAIN) so the script works with different NDK versions (e.g., r27c or r26d).
 Redundancy Removal: Consolidated multiple sed patches into single, robust blocks. Removed failed fallback logic and duplicate commands.
 Magisk Packaging: Streamlined the port_lib_for_magisk function to correctly set permissions, sonames, and generate the update-binary and customize.sh scripts.
+
+6. Version-Agnsotic
+Script now functiona and auto populates appropriatly consistent naming convention for output zipped files, and meta/config info based upon the particular version you are building.
 
 📜 The "Magic" Flags Used
 The final meson setup command that made it all work:
@@ -73,9 +76,13 @@ Packages it into a flashable Magisk module.
 - Execute script on linux deb terminal ```bash ./turnip_builder.sh```
 
 ### ToDo: 
-- Resolve complex dependency issues to enable shader cache and shader cache compression
-
-- Update script to include auto building .adpkg file so manual build isn't necessary
+| Planned | Completed |
+| :---    | :---      |
+|- Update script so that a readable, reasonable, consistent file naming convention is used | ✅ |
+| - Update script to include the auto population of approriate meta and config info to be auto zipped | ✅ |
+| - Update script to include auto building .adpkg file so manual build isn't necessary (auto zip - contents only! - of both build folders -Magisk/ADPKG) | ✅ |
+| - Update script to make version-agnostic; functioning regardless of mesarc version pulled and making inclusive of all version folder paths used by differently named archives and builds | ✅ |
+| - Resolve complex dependency issues to enable shader cache and shader cache compression | Next |
 
 ### References
 
