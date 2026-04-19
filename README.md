@@ -11,15 +11,22 @@ The script now successfully builds vulkan.turnip.so (Mesa 26.0.X) for Android aa
 1. Variable Scope: Fixed a bug where $MESASRC_DIR was used as an absolute path after cding into it, causing double-path errors. Switched to relative paths (src/...) inside the build function.
 
 2. Dependency Management (The "Host Library" Nightmare)
-Host vs. Target Mismatch: The linker kept trying to link against x86_64 host libraries (/usr/lib/x86_64-linux-gnu/libz.so, libelf.so) instead of the aarch64 NDK libraries.
-Fix: Added sed commands to strip these explicit host paths from the generated build.ninja file.
-Missing libz (Zlib): Disabling zlib caused "undefined symbol" errors (gzopen, deflate, etc.) because parts of the code still called these functions.
-Fix: Created custom C stubs (zlib_stubs.c) that provide empty implementations of all gz* functions. Compiled these into a static library (libz_stub.a) and injected it into the link command right before --end-group to satisfy the linker without needing the real library.
-Missing libdl: Meson couldn't find libdl in the cross-compile environment.
-Fix: Added -ldl explicitly to the linker arguments, relying on the NDK's libc which provides these symbols on Android.
+
+- Host vs. Target Mismatch: The linker kept trying to link against x86_64 host libraries (/usr/lib/x86_64-linux-gnu/libz.so, libelf.so) instead of the aarch64 NDK libraries.
+
+- Fix: Added sed commands to strip these explicit host paths from the generated build.ninja file.
+
+- Missing libz (Zlib): Disabling zlib caused "undefined symbol" errors (gzopen, deflate, etc.) because parts of the code still called these functions.
+
+- Fix: Created custom C stubs (zlib_stubs.c) that provide empty implementations of all gz* functions. Compiled these into a static library (libz_stub.a) and injected it into the link command right before --end-group to satisfy the linker without needing the real library.
+
+- Missing libdl: Meson couldn't find libdl in the cross-compile environment.
+
+- Fix: Added -ldl explicitly to the linker arguments, relying on the NDK's libc which provides these symbols on Android.
 
 3. Feature Disabling for Stability
-To bypass complex dependencies that were impossible to resolve cleanly in a cross-compile environment, deliberately disabled non-essential features:
+
+- To bypass complex dependencies that are impossible to resolve cleanly in a cross-compile environment, deliberately disabled non-essential features:
 
 -Dshader-cache=disabled: Prevented the build from requiring zlib for shader caching. (Trade-off: Slightly longer initial game load times after reboot, but no runtime stutter).
 
@@ -31,10 +38,14 @@ To bypass complex dependencies that were impossible to resolve cleanly in a cros
 
 
 4. Build System Patches
-libfreedreno_drm Error: The perfcntrs/meson.build file referenced a variable that only exists when Gallium is enabled.
-Fix: Added a sed command to comment out line 40 of src/freedreno/perfcntrs/meson.build before running Meson.
-Test Tool Failures: Debug tools like ir3_disasm and fd5_layout failed to link due to the host library issues.
-Fix: Created dummy empty files for these targets in the build directory so Ninja would skip the failed link step and proceed.
+
+- libfreedreno_drm Error: The perfcntrs/meson.build file referenced a variable that only exists when Gallium is enabled.
+ 
+- Fix: Added a sed command to comment out line 40 of src/freedreno/perfcntrs/meson.build before running Meson.
+ 
+- Test Tool Failures: Debug tools like ir3_disasm and fd5_layout failed to link due to the host library issues.
+ 
+- Fix: Created dummy empty files for these targets in the build directory so Ninja would skip the failed link step and proceed.
 
 5. Script Optimization & Cleanup
 Dynamic NDK Handling: Replaced hardcoded NDK paths with variables ($ndkver, $NDK_TOOLCHAIN) so the script works with different NDK versions (e.g., r27c or r26d).
