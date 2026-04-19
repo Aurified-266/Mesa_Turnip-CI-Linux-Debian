@@ -6,11 +6,11 @@ This is a bash script to build Turnip for android as a magisk module and adpkg. 
 
 The script now successfully builds vulkan.turnip.so (Mesa 26.0.X) for Android aarch64 on Linux Debian; and packages it into a Magisk module and adpkg, ready for installation on Adreno GPU devices. Developer debug tools disabled. GPU Cache disabled.
 
-🔍 Summary of Changes & Fixes
+### 🔍 Summary of Changes & Fixes
 
-1. Variable Scope: Fixed a bug where $MESASRC_DIR was used as an absolute path after cding into it, causing double-path errors. Switched to relative paths (src/...) inside the build function.
+#### 1. Variable Scope: Fixed a bug where $MESASRC_DIR was used as an absolute path after cding into it, causing double-path errors. Switched to relative paths (src/...) inside the build function.
 
-2. Dependency Management (The "Host Library" Nightmare) 💀
+#### 2. Dependency Management (The "Host Library" Nightmare) 💀
 
 - Host vs. Target Mismatch: The linker kept trying to link against x86_64 host libraries (/usr/lib/x86_64-linux-gnu/libz.so, libelf.so) instead of the aarch64 NDK libraries.
 
@@ -24,7 +24,7 @@ The script now successfully builds vulkan.turnip.so (Mesa 26.0.X) for Android aa
 
 - Fix: Added -ldl explicitly to the linker arguments, relying on the NDK's libc which provides these symbols on Android.
 
- 3. Feature Disabling for Stability ❗
+ #### 3. Feature Disabling for Stability ❗
 
 - To bypass complex dependencies that are impossible to resolve cleanly in a cross-compile environment, deliberately disabled non-essential features:
 
@@ -37,7 +37,7 @@ The script now successfully builds vulkan.turnip.so (Mesa 26.0.X) for Android aa
 -Dgallium-drivers=: Disabled the Gallium API (desktop OpenGL) to focus purely on the Vulkan driver, reducing build size and complexity.
 
 
-4. Build System Patches 🔨
+#### 4. Build System Patches 🔨
 
 - libfreedreno_drm Error: The perfcntrs/meson.build file referenced a variable that only exists when Gallium is enabled.
  
@@ -47,7 +47,7 @@ The script now successfully builds vulkan.turnip.so (Mesa 26.0.X) for Android aa
  
 - Fix: Created dummy empty files for these targets in the build directory so Ninja would skip the failed link step and proceed.
 
-5. Script Optimization & Cleanup 🔬
+#### 5. Script Optimization & Cleanup 🔬
 
 - Dynamic NDK Handling: Replaced hardcoded NDK paths with variables ($ndkver, $NDK_TOOLCHAIN) so the script works with different NDK versions (e.g., r27c or r26d).
 
@@ -55,11 +55,12 @@ The script now successfully builds vulkan.turnip.so (Mesa 26.0.X) for Android aa
 
 - Magisk Packaging: Streamlined the port_lib_for_magisk function to correctly set permissions, sonames, and generate the update-binary and customize.sh scripts.
 
-6. Version-Agnsotic 🔁
+#### 6. Version-Agnsotic 🔁
 
-Script now auto populates appropriatly consistent naming convention for output zipped files, and meta/config info based upon the particular version you are building.
+- Script now auto populates appropriatly consistent naming convention for output zipped files, and meta/config info based upon the particular version you are building.
 
-📜 The "Magic" Flags Used
+### 📜 The "Magic" Flags Used
+
 The final meson setup command that made it all work:
 
 -Dbuildtype=release \
@@ -75,7 +76,7 @@ The final meson setup command that made it all work:
 -Dshader-cache=disabled \
 -Dc_link_args="-L$workdir/stub_libs -lz_stub -ldl"
 
-🚀 Conclusion
+### 🚀 Conclusion
 
 Downloads the NDK and Mesa source.
 Patches the source code to remove incompatible features.
@@ -93,7 +94,7 @@ Packages an ADPKG file ready for emulators, or for other Adreno GPU's by other r
 #### Emulation/Root adpkg
 - For emulators, or other root level adpkg installs - software or firmware
 
-### To Build Locally
+#### To Build Locally
 - Obtain the script [turnip_builder.sh]
 - Execute script on linux deb terminal ```bash ./turnip_builder.sh```
 
