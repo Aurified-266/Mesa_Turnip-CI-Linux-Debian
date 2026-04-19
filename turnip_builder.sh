@@ -1,8 +1,9 @@
 #!/bin/bash -e
 
-# A bash script for Linux designed to build Magisk Mesa Turnip drivers on Debian-based systems.
+# A bash script for Linux designed to build ADPKG and Magisk Mesa Turnip drivers on Debian-based systems.
 # Based on work by ilhan-athn7 and K11MCH1.
-# Optimized for Mesa 26.0.4 (Stable) with Android NDK r27c.
+# Optimized for Mesa 26.0.X (Dev/Stable) with Android NDK r27d.
+# Default configured for stable branch - update ndkver and mesarc when necessary - update "Dev", "RC", and "GA" where applicable
 
 # Define variables
 green='\033[0;32m'
@@ -11,13 +12,13 @@ yellow='\033[1;33m'
 nocolor='\033[0m'
 workdir="$(pwd)/turnip_workdir"
 magiskdir="$workdir/turnip_module"
-ndkver="android-ndk-r27c"
+ndkver="android-ndk-r27d"
 ndk_base="$workdir/$ndkver"
 sdkver="34"
 
-# === STABLE RELEASE BUILD ===
+# === BUILD SELECTION ===
 # Uncomment the line for the version you want to build.
-mesasrc="https://gitlab.freedesktop.org/mesa/mesa/-/archive/mesa-26.0.4/mesa-mesa-26.0.4.zip"
+mesasrc="https://gitlab.freedesktop.org/mesa/mesa/-/archive/mesa-26.0.5/mesa-mesa-26.0.5.zip" # Version Specific
 # mesasrc="https://gitlab.freedesktop.org/mesa/mesa/-/archive/main/mesa-main.zip" # Dev branch
 
 clear
@@ -27,6 +28,7 @@ run_all(){
     prepare_workdir
     build_lib_for_android
     port_lib_for_magisk
+    create_backup_package
 }
 
 check_deps(){
@@ -100,6 +102,10 @@ prepare_workdir(){
     fi
     
     echo "Found Mesa source directory: $MESASRC_DIR"
+    
+    # EXPORT this variable so other functions can see it!
+    export MESASRC_DIR
+    
     cd "$MESASRC_DIR"
 }
 
@@ -190,7 +196,6 @@ EOF
     echo "Zlib stubs created."
 
     # Patch perfcntrs to avoid "Unknown variable" error
-    # We are already inside $MESASRC_DIR, so use relative path
     if [ -f "src/freedreno/perfcntrs/meson.build" ]; then
         sed -i '40s/^/# PATCHED: /' "src/freedreno/perfcntrs/meson.build"
     fi
@@ -269,10 +274,38 @@ EOF
 port_lib_for_magisk(){
     echo "Preparing Magisk module..."
     
-    cp "build-android-aarch64/src/freedreno/vulkan/libvulkan_freedreno.so" "$workdir/vulkan.turnip.so"
-    
+    # Ensure - in the workdir
     cd "$workdir"
-    patchelf --set-soname vulkan.turnip.so vulkan.turnip.so
+    
+    # CRITICAL FIX: The build folder is inside the MESASRC_DIR, not in $workdir
+    if [ -z "$MESASRC_DIR" ]; then
+        echo -e "$red ERROR: Mesa source directory variable not set! $nocolor"
+        exit 1
+    fi
+    
+    BUILD_PATH="$workdir/$MESASRC_DIR/build-android-aarch64"
+    SOURCE_LIB="$BUILD_PATH/src/freedreno/vulkan/libvulkan_freedreno.so"
+    
+    # Verify the built library exists
+    if [ ! -f "$SOURCE_LIB" ]; then
+        echo -e "$red ERROR: Built library not found at: $SOURCE_LIB $nocolor"
+        echo "Checking if build directory exists..."
+        if [ -d "$BUILD_PATH" ]; then
+            echo "Build directory exists. Contents:"
+            ls -la "$BUILD_PATH/src/freedreno/vulkan/" 2>/dev/null || echo "Vulkan folder missing."
+        else
+            echo "Build directory does not exist: $BUILD_PATH"
+        fi
+        exit 1
+    fi
+    
+    echo "Found library at: $SOURCE_LIB"
+    
+    # Copy the library to workdir root
+    cp "$SOURCE_LIB" "$workdir/vulkan.turnip.so"
+    
+    # Set the soname
+    patchelf --set-soname vulkan.turnip.so "$workdir/vulkan.turnip.so"
     
     magiskdir="$workdir/turnip_module"
     p1="system/vendor/lib64/hw"
@@ -281,33 +314,24 @@ port_lib_for_magisk(){
     meta="META-INF/com/google/android"
     mkdir -p "$magiskdir/$meta"
     
-    # FIXED: Hardcode version or detect from source directory
-    cd "$workdir/mesa-mesa-26.0.4"  # Ensure we're in the Mesa source dir
-    version=$(grep -oP '^\d+\.\d+\.\d+' VERSION 2>/dev/null || echo "26.0.4")
+    # Get version
+    cd "$workdir/$MESASRC_DIR"
+    version=$(grep -oP '^\d+\.\d+\.\d+' VERSION 2>/dev/null || echo "Unknown")
     version_code=$(echo "$version" | tr -cd '0-9')
-    cd "$magiskdir"  # Return to Magisk dir
+    cd "$magiskdir"
     
     cat >"$magiskdir/module.prop" <<EOF
 id=turnip
-name=Turnip Vulkan Driver
-version=$version
+name=Aurified.Turnip GA$version Vulkan Driver
+version=GA$version
 versionCode=$version_code
 author=Aurified.Dev
-description=Turnip is an open-source Vulkan driver for Adreno GPUs based on Mesa $version. Debug and GPU Cache Disabled.
+description=Aurified.Turnip is an open-source Vulkan driver for Adreno GPUs based on Mesa $version. Debug and GPU Cache Disabled.
 minApi=29
 EOF
 
     cat >"$magiskdir/$meta/updater-script" <<EOF
 #MAGISK
-EOF
-
-    cat >"$magiskdir/module.prop" <<EOF
-id=turnip
-name=Turnip Vulkan Driver
-version=$version
-versionCode=$version_code
-author=Aurified.Dev
-description=Turnip is an open-source Vulkan driver for Adreno GPUs based on Mesa. Debug and GPU Cache Disabled.
 EOF
 
     cat >"$magiskdir/system.prop" <<EOF
@@ -331,7 +355,84 @@ EOF
     fi
     
     echo -e "$green Magisk module created: $workdir/turnip_module.zip $nocolor"
-    echo "Install via Magisk Manager or recovery."
+}
+
+create_backup_package(){
+    echo "Creating Version Specific Aurified ADPKG Package and Magisk Module..."
+    
+    # Ensure - in the workdir
+    cd "$workdir"
+    
+    # Verify the library exists
+    if [ ! -f "$workdir/vulkan.turnip.so" ]; then
+        echo -e "$red ERROR: vulkan.turnip.so not found! $nocolor"
+        exit 1
+    fi
+    
+    # Get version
+    if [ -z "$MESASRC_DIR" ]; then
+        echo -e "$red ERROR: Mesa source directory variable not set! $nocolor"
+        exit 1
+    fi
+    
+    cd "$workdir/$MESASRC_DIR"
+    version=$(grep -oP '^\d+\.\d+\.\d+' VERSION 2>/dev/null || echo "Unknown")
+    cd "$workdir"
+    
+    # Define folder names
+    backup_folder="Aurified_Turnip_GA${version}.adpkg"
+    magisk_backup_folder="Aurified_Turnip_Magisk_Module_GA${version}"
+    
+    # Create the ADPKG folder
+    mkdir -p "$backup_folder"
+    
+    # Copy the library
+    cp "$workdir/vulkan.turnip.so" "$backup_folder/"
+    
+    # Create the meta.json
+    cat > "$backup_folder/meta.json" <<EOF
+{
+  "schemaVersion": 1,
+  "name": "Aurified.Turnip_GA${version}",
+  "description": "GA${version} - Stable Vulkan driver built from mesa repo; Debug and GPU cache disabled",
+  "author": "Aurified.Dev",
+  "packageVersion": "GA${version}",
+  "vendor": "Mesa3D",
+  "driverVersion": "${version}",
+  "minApi": 29,
+  "libraryName": "vulkan.turnip.so"
+}
+EOF
+
+    # Create the Magisk Module Backup Folder
+    mkdir -p "$magisk_backup_folder"
+    
+    # Copy the ENTIRE Magisk module directory
+    cp -r "$workdir/turnip_module"/* "$magisk_backup_folder/"
+    
+    # --- ZIPPING FIX START ---
+    
+    # Zip the ADPKG folder (contents only)
+    cd "$backup_folder"
+    if zip -r "../$backup_folder.zip" ./*; then
+        echo -e "$green ADPKG package created: $workdir/$backup_folder.zip $nocolor"
+    else
+        echo -e "$red Failed to create ADPKG zip! $nocolor"
+    fi
+    cd "$workdir"
+
+    # Zip the Magisk Module Backup (contents only)
+    cd "$magisk_backup_folder"
+    if zip -r "../$magisk_backup_folder.zip" ./*; then
+        echo -e "$green Magisk Module Backup created: $workdir/$magisk_backup_folder.zip $nocolor"
+    else
+        echo -e "$red Failed to create Magisk backup zip! $nocolor"
+    fi
+    cd "$workdir"
+    
+    # --- ZIPPING FIX END ---
+    
+    echo -e "$green Generation process completed! $nocolor"
 }
 
 run_all
