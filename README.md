@@ -90,7 +90,7 @@ Packages an ADPKG file ready for emulators, or for other Adreno GPU's by other r
 
 #### Magisk Build:
 - Ensure program is using Vulkan for best compatibility
-- else-OpenGL_ES - Defaults to Vulkan driver for render *(vulkan -> egl -> opengles)*
+- `else-OpenGL - Defaults to Vulkan driver for render via OpenGL_ES / (vulkan -> egl -> opengles)`
 
 #### Emulation/Root adpkg
 - For emulators, or other root level adpkg installs - software or firmware
