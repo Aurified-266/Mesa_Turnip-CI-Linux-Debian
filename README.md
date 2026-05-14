@@ -73,6 +73,7 @@ The final meson setup command that made it all work:
 -Dvulkan-beta=true \
 -Dfreedreno-kmds=kgsl \
 -Dzstd=disabled \ *Re-enabled*
+
 -Dspirv-tools=disabled \
 -Dzlib=disabled \
 -Dshader-cache=disabled \
