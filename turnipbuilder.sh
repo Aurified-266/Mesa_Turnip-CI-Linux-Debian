@@ -2,8 +2,8 @@
 
 # A bash script for Linux designed to build ADPKG and Magisk Mesa Turnip drivers on Debian-based systems.
 # Based on work by ilhan-athn7 and K11MCH1.
-# Optimized for Mesa 26.X.X (Stable) with Android NDK r27d.
-# Update ndkver and mesarc when necessary
+# Optimized for Mesa 26.X.X (Stable/Dev) with Android NDK r27d.
+# Ensure update NDK for next LTS version
 
 # Define variables
 green='\033[0;32m'
@@ -16,10 +16,23 @@ ndkver="android-ndk-r27d"
 ndk_base="$workdir/$ndkver"
 sdkver="34"
 
-# === BUILD SELECTION ===
-# Uncomment the line for the version you want to build.
-mesasrc="https://gitlab.freedesktop.org/mesa/mesa/-/archive/mesa-26.1.0/mesa-mesa-26.1.0.zip" # Version Specific
-# mesasrc="https://gitlab.freedesktop.org/mesa/mesa/-/archive/main/mesa-main.zip" # Dev branch
+# === BUILD CONFIGURATION ===
+BUILD_TYPE="DEV"  # <--- Change to "STABLE" or "DEV"
+
+if [ "$BUILD_TYPE" == "DEV" ]; then
+    mesasrc="https://gitlab.freedesktop.org/mesa/mesa/-/archive/main/mesa-main.zip"
+    NAME_PREFIX="DEVEL"
+    DESCRIPTION="Development branch open-source Vulkan driver for Adreno GPUs based on Mesa."
+    MODULE_NAME="Aurified.Turnip DEVEL"
+elif [ "$BUILD_TYPE" == "STABLE" ]; then
+    mesasrc="https://gitlab.freedesktop.org/mesa/mesa/-/archive/mesa-26.0.7/mesa-mesa-26.0.7.zip"
+    NAME_PREFIX="GA"
+    DESCRIPTION="Stable open-source Vulkan driver for Adreno GPUs based on Mesa."
+    MODULE_NAME="Aurified.Turnip GA"
+else
+    echo -e "$red ERROR: Invalid BUILD_TYPE '$BUILD_TYPE'. Must be 'STABLE' or 'DEV'. $nocolor"
+    exit 1
+fi
 
 clear
 
@@ -461,11 +474,11 @@ port_lib_for_magisk(){
     
     cat >"$magiskdir/module.prop" <<EOF
 id=turnip
-name=💰Aurified.Turnip GA$version Vulkan Driver
-version=GA$version
+name=💰${MODULE_NAME}${version} Vulkan Driver
+version=${NAME_PREFIX}$version
 versionCode=$version_code
 author=Aurified.Dev
-description=💰Aurified.Turnip is a Stable open-source Vulkan driver for Adreno GPUs based on Mesa $version. Debug and GPU Cache Disabled.
+description=💰${MODULE_NAME} is a ${DESCRIPTION} Debug and GPU Cache Disabled.
 minApi=29
 EOF
 
@@ -527,7 +540,7 @@ EOF
 create_backup_package(){
     echo "Creating Version Specific Aurified ADPKG Package and Magisk Module..."
     
-    # Ensure - in the workdir
+    # Ensure we are in the workdir
     cd "$workdir"
     
     # Verify the library exists
@@ -546,24 +559,28 @@ create_backup_package(){
     version=$(grep -oP '^\d+\.\d+\.\d+' VERSION 2>/dev/null || echo "Unknown")
     cd "$workdir"
     
-    # Define folder names
-    backup_folder="Aurified_Turnip_GA${version}.adpkg"
-    magisk_backup_folder="Aurified_Turnip_Magisk_Module_GA${version}"
+    # Define folder names using the dynamic prefix
+    backup_folder="Aurified_Turnip_${NAME_PREFIX}${version}.adpkg"
+    magisk_backup_folder="Aurified_Turnip_Magisk_Module_${NAME_PREFIX}${version}"
     
-    # Create the ADPKG folder
+    echo "Creating backup folder: $backup_folder"
+    
+    # --- CRITICAL FIX: CREATE FOLDERS FIRST ---
     mkdir -p "$backup_folder"
+    mkdir -p "$magisk_backup_folder"
+    # ------------------------------------------
     
     # Copy the library
     cp "$workdir/vulkan.turnip.so" "$backup_folder/"
     
-    # Create the meta.json
+    # Create the meta.json (NOW the folder exists)
     cat > "$backup_folder/meta.json" <<EOF
 {
   "schemaVersion": 1,
-  "name": "💰Aurified.Turnip_GA${version}",
-  "description": "GA${version} - Stable Vulkan driver built from mesa repo; Debug and GPU cache disabled",
+  "name": "💰${MODULE_NAME}${version}",
+  "description": "${NAME_PREFIX}${version} - ${DESCRIPTION} Debug and GPU Cache disabled",
   "author": "Aurified.Dev",
-  "packageVersion": "GA${version}",
+  "packageVersion": "${NAME_PREFIX}${version}",
   "vendor": "Mesa3D",
   "driverVersion": "${version}",
   "minApi": 29,
@@ -571,9 +588,6 @@ create_backup_package(){
 }
 EOF
 
-    # Create the Magisk Module Backup Folder
-    mkdir -p "$magisk_backup_folder"
-    
     # Copy the ENTIRE Magisk module directory
     cp -r "$workdir/turnip_module"/* "$magisk_backup_folder/"
     
