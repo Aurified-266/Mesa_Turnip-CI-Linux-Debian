@@ -65,9 +65,9 @@ The script now successfully builds *vulkan.turnip.so (Mesa 26.X.X)* for Android 
 
 - Magisk Packaging: Streamlined the port_lib_for_magisk function to correctly set permissions, sonames, and generate the update-binary and customize.sh scripts.
 
-#### 6. Version-Agnostic 🔁
+#### 6. Version-Agnostic / Meta Info🔁
 
-- Script now auto populates appropriately consistent naming convention for output zipped files, and meta/config info based upon the particular version you are building.
+- Script now functions correctly regardless of pulled version / auto populates appropriately consistent naming convention for output zipped files, and meta/config info based upon the particular build.
 
 ### **📜 The "Magic" Flags Used**
 
